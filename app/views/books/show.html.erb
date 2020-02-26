@@ -2,40 +2,76 @@
 
 <%= render "layouts/header" %>
 <div class="container">
-<%= render "layouts/error", book_new: @book_new %>
-<div class="row">
-<div class="col-xs-3">
-<%= render "layouts/side", user: @book.user, book_new: @book_new %>
-</div>
-<!--投稿した内容の詳細一つ-->
-<div class="col-xs-9">
-	<h2>Book detail</h2>
-	<table class="table">
-		<thead>
-           <tr></tr><!--ヘッダーなし -->
-		</thead>
-		<tbody><!-- ユーザーの投稿一件詳細-->
-			<tr>
-				<td><%= attachment_image_tag @book.user, :profile_image, :fill, 40, 40,  fallback: "sample.jpg" %>
-				    <br>
-				    <%= link_to @book.user.name, user_path(@book.user.id)%><!--ユーザーのイメージ,名前 アイコン押すとユーザーの投稿一覧??-->
-				</td>
-				<td><%= @book.title %></td><!--タイトル -->
-				<td><%= @book.body %></td><!--感想 -->
-				<!--ログインしてる人の時だけボタンが出るように-->
-				<% if @book.user == current_user %>
-				  <td><%= link_to edit_book_path(@book),class: "btn btn-success" do %>
-				  	    <span>Edit</span>
-				  	  <% end %>
-				  </td>
-				  <td><%= link_to book_path(@book), class: "btn btn-danger",method: :delete, data: {confirm: "本当に消しますか？"} do %>
-				  	  <span>Destroy</span>
-				  	  <% end %>
-				  </td><!--destroy -->
-				<% end %>
-			</tr>
-		</tbody>
-	</table>
-	</div>
-</div>
-<%= render "layouts/footer" %>
+	<%= render "layouts/error", book_new: @book_new %>
+	<div class="row">
+		<div class="col-xs-3">
+			<%= render "layouts/side", user: @book.user, book_new: @book_new %>
+		</div>
+		<!--投稿した内容の詳細一つ-->
+		<div class="col-xs-9">
+			<h2>Book detail</h2>
+			<table class="table">
+				<thead>
+					<tr></tr><!--ヘッダーなし -->
+				</thead>
+				<tbody><!-- ユーザーの投稿一件詳細-->
+					<tr>
+						<td><%= attachment_image_tag @book.user, :profile_image, :fill, 40, 40,  fallback: "sample.jpg" %>
+							<br>
+							<%= link_to @book.user.name, user_path(@book.user.id)%><!--ユーザーのイメージ,名前 アイコン押すとユーザーの投稿一覧-->
+						</td>
+						<td><%= @book.title %></td><!--タイトル -->
+						<td><%= @book.body %></td><!--感想 -->
+						<!--ログインしてる人の時だけボタンが出るように-->
+
+						<!--いいね-->
+						<% if @book.favorited_by?(current_user) %><!--ログインユーザーがいいねしているのが存在するか-->
+						<!--いいねあり、削除リンク-->
+						　　　<%= link_to book_favorites_path(@book),method: :delete do %>
+						　　　　<span class="glyphicon glyphicon-heart">
+							<%= @book.favorites.count %></span><!--本に紐づいたいいねの数-->
+							<% end %>
+						<% else %>
+						<!--いいねなし投稿-->
+							<%= link_to book_favorites_path(@book),method: :post do %>
+							　　<span class="glyphicon glyphicon-heart-empty">
+								<%= @book.favorites.count %></span><!--本に紐づいたいいねの数-->
+							<% end %>
+						<% end %>
+						<% if @book.user == current_user %><!--本を投稿した人が本人の時に編集削除-->
+							<td><%= link_to edit_book_path(@book),class: "btn btn-success" do %>
+									<span>Edit</span>
+								<% end %>
+							</td>
+							<td><%= link_to book_path(@book), class: "btn btn-danger",method: :delete, data: {confirm: "本当に消しますか？"} do %>
+									<span>Destroy</span>
+									<% end %>
+								</td><!--destroy -->
+								<% end %>
+							</tr>
+						</tbody>
+					</table>
+					<table>
+						<% @book_comments.each do |book_comment| %> <!-- コメント一覧 -->
+						<tr>
+							<td><!-- コメントした人の情報 -->
+								<%= link_to user_path(book_comment.user), class: "user_#{book_comment.user.id}" do %>
+								<%= attachment_image_tag book_comment.user, :profile_image, :fill, 50, 50, fallback: "sample.jpg", size: "50x50" %><br>
+								<%= book_comment.user.name %><!--book_commentに紐づいたユーザーの名前-->
+								<% end %>
+							</td>
+							<td><%= book_comment.comment %></td><!--コメント-->
+							<% unless current_user != book_comment.user %><!-- カレンとユーザーとコメントしたユーザーが同じでない場合以外-->
+							<td><%= link_to 'Destroy', book_book_comments_path(book_comment.id), method: :delete %></td>
+							<% end %>
+						</tr>
+						<% end %>
+					</table>
+					<div class="comment-form"><!-- コメントフォーム-->
+						<%= form_for [@book, @book_comment] do |f| %><!-- @bookに紐づいた@book＿commentなので-->
+						<%= f.text_area :comment %>
+						<%= f.submit '送信' %>
+						<% end %>
+					</div>
+				</div>
+				<%= render "layouts/footer" %>

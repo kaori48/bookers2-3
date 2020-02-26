@@ -1,4 +1,4 @@
-
+ 
 <%= render "layouts/header" %>
 <div class="container">
 <%= render "layouts/error", book_new: @book_new %>
@@ -15,6 +15,7 @@
            	 <tr>
            	 	<th>Title</th>
            	 	<th>Option</th>
+           	 	<th></th>
            	 </tr>
            </tr>
 		</thead>
@@ -29,6 +30,24 @@
 				</td>
 				<td><%= link_to book.title, book_path(book.id) %></td> <!--タイトル,そのidのbookshowへ（book.id） -->
 				<td><%= book.body %></td><!--感想表示 -->
+				<td><!--いいね機能 -->
+					<% if book.favorited_by?(current_user) %><!--ログインユーザーがいいねしているのが存在するか-->
+						<!--いいねあり、削除リンク-->
+						　　　<%= link_to book_favorites_path(book),method: :delete do %>
+						　　　　<span class="glyphicon glyphicon-heart">
+							<%= book.favorites.count %></span><!--本に紐づいたいいねの数-->
+							<% end %>
+						<% else %>
+						<!--いいねなし投稿-->
+							<%= link_to book_favorites_path(book),method: :post do %>
+							　　<span class="glyphicon glyphicon-heart-empty">
+								<%= book.favorites.count %></span><!--本に紐づいたいいねの数-->
+							<% end %>
+						<% end %>
+				</td>
+				<td><!--コメント数 -->
+					コメント数：<%= book.book_comments.count %>
+				</td>
 			</tr>
 			<% end %>
 		</tbody>

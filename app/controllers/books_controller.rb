@@ -12,6 +12,8 @@ class BooksController < ApplicationController
     @book_new = Book.new#からの箱を渡す
     @book = Book.find(params[:id])#bookから１けん持ってくる
      #ログインしているユーザーと定義する
+     @book_comment = BookComment.new#新規コメント投稿,あんだーバー使わない
+     @book_comments = @book.book_comments#bookからBook.find(params[:id]で１けん持ってきたののコメント
   end
 #新規データ登録用?
   def new
